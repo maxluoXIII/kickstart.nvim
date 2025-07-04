@@ -227,6 +227,16 @@ vim.opt.shellcmdflag = '-c'
 vim.opt.shellquote = ''
 vim.opt.shellxquote = ''
 
+local function get_cmake_version()
+  if vim.fn.executable 'cmake' == 0 then
+    return nil
+  else
+    local ver_str = vim.fn.system('cmake --version | head -1 | cut -f3 -d" "')
+    local _, _, major, minor, rev = string.find(ver_str, '(%d+)%.(%d+)%.(%d+)')
+    return {major = tonumber(major), minor = tonumber(minor), rev = tonumber(rev)}
+  end
+end
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -376,7 +386,8 @@ require('lazy').setup({
 
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
-        build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release',
+        -- cmake no longer supports versions < 3.5, which fzf still uses
+        build = (get_cmake_version()['major'] >= 4) and 'cmake -S. -Bbuild -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release' or 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release',
 
         -- `cond` is a condition used to determine whether this plugin should be
         -- installed and loaded.
