@@ -231,9 +231,9 @@ local function get_cmake_version()
   if vim.fn.executable 'cmake' == 0 then
     return nil
   else
-    local ver_str = vim.fn.system('cmake --version | head -1 | cut -f3 -d" "')
+    local ver_str = vim.fn.system 'cmake --version'
     local _, _, major, minor, rev = string.find(ver_str, '(%d+)%.(%d+)%.(%d+)')
-    return {major = tonumber(major), minor = tonumber(minor), rev = tonumber(rev)}
+    return { major = tonumber(major), minor = tonumber(minor), rev = tonumber(rev) }
   end
 end
 
@@ -387,7 +387,9 @@ require('lazy').setup({
         -- `build` is used to run some command when the plugin is installed/updated.
         -- This is only run then, not every time Neovim starts up.
         -- cmake no longer supports versions < 3.5, which fzf still uses
-        build = (get_cmake_version()['major'] >= 4) and 'cmake -S. -Bbuild -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release' or 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release',
+        build = (get_cmake_version()['major'] >= 4)
+            and 'cmake -S. -Bbuild -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release'
+          or 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release',
 
         -- `cond` is a condition used to determine whether this plugin should be
         -- installed and loaded.
@@ -692,8 +694,8 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        pyright = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
