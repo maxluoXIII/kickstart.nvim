@@ -131,6 +131,9 @@ vim.o.smartcase = true
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
+-- Add color columns
+vim.o.colorcolumn = '80,100,120'
+
 -- Decrease update time
 vim.o.updatetime = 250
 
@@ -237,6 +240,27 @@ local function get_cmake_version()
   end
 end
 
+-- files with 'uv run' in first line (hopefully shebang) should be python
+vim.filetype.add {
+  pattern = {
+    ['.*'] = function(path, bufnr)
+      if string.find(vim.api.nvim_buf_get_lines(bufnr, 0, 1, true)[1], 'uv run', 0, true) then
+        return 'python'
+      end
+    end,
+  },
+}
+
+-- copyToCmvc keymap
+vim.keymap.set('n', '<leader>mf', function()
+  local ret = vim.system({ 'copyToCmvc', vim.api.nvim_buf_get_name(0) }):wait()
+  if ret.code == 0 then
+    print 'copyToCmvc done'
+  else
+    print 'error trying to do copyToCmvc!'
+  end
+end, { desc = 'copyToCmvc [f]ile' })
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -265,7 +289,10 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  { -- Detect tabstop and shiftwidth automatically
+    'NMAC427/guess-indent.nvim',
+    opts = {},
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
