@@ -252,14 +252,63 @@ vim.filetype.add {
 }
 
 -- copyToCmvc keymap
-vim.keymap.set('n', '<leader>mf', function()
+vim.keymap.set('n', '<leader>mtf', function()
   local ret = vim.system({ 'copyToCmvc', vim.api.nvim_buf_get_name(0) }):wait()
   if ret.code == 0 then
     print 'copyToCmvc done'
   else
     print 'error trying to do copyToCmvc!'
+    print(ret.stderr)
   end
-end, { desc = 'copyToCmvc [f]ile' })
+end, { desc = 'copy[T]oCmvc [f]ile' })
+
+vim.keymap.set('n', '<leader>mtr', function()
+  vim.ui.input({ prompt = 'Enter release to copy to: ' }, function(input)
+    if input ~= nil and input ~= '' then
+      local ret = vim.system({ 'copyToCmvc', vim.api.nvim_buf_get_name(0), '-r', input }):wait()
+      if ret.code == 0 then
+        print 'copyToCmvc done'
+      else
+        print 'error trying to do copyToCmvc!'
+        print(ret.stderr)
+      end
+    end
+  end)
+end, { desc = 'copy[T]oCmvc file to [r]elease' })
+
+vim.keymap.set('n', '<leader>mtb', function()
+  -- local ret = vim.system({ 'copyToCmvc', vim.api.nvim_buf_get_name(0) }):wait()
+  local pattern = '/Volumes/slic/([^/]+)'
+  local path = vim.api.nvim_buf_get_name(0)
+  local _, _, release = string.find(path, pattern)
+  local ret = vim.system({ 'git', 'merge-base', release, 'HEAD' }, { text = true }):wait()
+  local merge_base = string.sub(ret.stdout, 1, -2)
+  ret = vim.system({ 'git', 'diff', '--name-only', merge_base }, { text = true }):wait()
+  local failed = {}
+  string.gsub(ret.stdout, '(%S+)', function(file)
+    ret = vim.system({ 'copyToCmvc', '/Volumes/slic/' .. release .. '/' .. file }):wait()
+    if ret.code ~= 0 then
+      failed[#failed + 1] = file .. ': ' .. ret.stderr
+    end
+  end)
+  if #failed == 0 then
+    print 'successfully copied branch to cmvc'
+  else
+    for i = 1, #failed do
+      print(failed[i])
+    end
+  end
+end, { desc = 'copy[T]oCmvc [b]ranch' })
+
+vim.keymap.set('n', '<leader>mff', function()
+  local ret = vim.system({ 'copyFromCmvc', vim.api.nvim_buf_get_name(0) }):wait()
+  if ret.code == 0 then
+    print 'copyFromCmvc done'
+  else
+    print 'error trying to do copyFromCmvc!'
+    print(ret.stderr)
+  end
+end, { desc = 'copy[F]romCmvc [f]ile' })
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
