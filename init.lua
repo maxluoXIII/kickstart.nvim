@@ -253,9 +253,10 @@ vim.filetype.add {
 
 -- copyToCmvc keymap
 vim.keymap.set('n', '<leader>mtf', function()
-  local ret = vim.system({ 'copyToCmvc', vim.api.nvim_buf_get_name(0) }):wait()
+  local filename = vim.api.nvim_buf_get_name(0)
+  local ret = vim.system({ 'copyToCmvc', filename }):wait()
   if ret.code == 0 then
-    print 'copyToCmvc done'
+    print('copied ' .. filename .. ' to cmvc')
   else
     print 'error trying to do copyToCmvc!'
     print(ret.stderr)
@@ -265,9 +266,10 @@ end, { desc = 'copy[T]oCmvc [f]ile' })
 vim.keymap.set('n', '<leader>mtr', function()
   vim.ui.input({ prompt = 'Enter release to copy to: ' }, function(input)
     if input ~= nil and input ~= '' then
-      local ret = vim.system({ 'copyToCmvc', vim.api.nvim_buf_get_name(0), '-r', input }):wait()
+      local filename = vim.api.nvim_buf_get_name(0)
+      local ret = vim.system({ 'copyToCmvc', filename, '-r', input }):wait()
       if ret.code == 0 then
-        print 'copyToCmvc done'
+        print('copied ' .. filename .. ' to ' .. input)
       else
         print 'error trying to do copyToCmvc!'
         print(ret.stderr)
@@ -301,9 +303,10 @@ vim.keymap.set('n', '<leader>mtb', function()
 end, { desc = 'copy[T]oCmvc [b]ranch' })
 
 vim.keymap.set('n', '<leader>mff', function()
-  local ret = vim.system({ 'copyFromCmvc', vim.api.nvim_buf_get_name(0) }):wait()
+  local filename = vim.api.nvim_buf_get_name(0)
+  local ret = vim.system({ 'copyFromCmvc', filename }):wait()
   if ret.code == 0 then
-    print 'copyFromCmvc done'
+    print('copied ' .. filename .. ' from cmvc')
   else
     print 'error trying to do copyFromCmvc!'
     print(ret.stderr)
