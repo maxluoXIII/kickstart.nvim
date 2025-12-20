@@ -25,7 +25,7 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      vim.o.background = 'light' -- or 'dark'
+      vim.o.background = 'dark' -- or 'light'
       require('solarized').setup {
         transparent = {
           enabled = true,

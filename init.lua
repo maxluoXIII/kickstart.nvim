@@ -910,7 +910,9 @@ require('lazy').setup({
           --   end,
           -- },
         },
-        opts = {},
+        opts = {
+          region_check_events = 'InsertEnter',
+        },
       },
       'folke/lazydev.nvim',
     },
